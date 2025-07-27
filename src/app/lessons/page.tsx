@@ -65,22 +65,39 @@ export default function LessonsPage() {
   const currentTopic = currentSubtopicData?.topic;
   const topicSubtopics = allSubtopics.filter((s) => s.topic === currentTopic);
 
+  // Fetch user progress from backend (MongoDB)
   useEffect(() => {
-    const storedProgress = localStorage.getItem("completedSubtopics");
-    if (storedProgress) setCompletedSubtopics(JSON.parse(storedProgress));
-    const storedDetails = localStorage.getItem("completedDetails");
-    if (storedDetails) setCompletedDetails(JSON.parse(storedDetails));
-    // Fade in panes after mount
-    setTimeout(() => setPanesVisible(true), 100);
+    async function fetchProgress() {
+      try {
+        const res = await fetch("/api/lessons/progress", { method: "GET" });
+        if (res.ok) {
+          const data = await res.json();
+          setCompletedSubtopics(data.completedSubtopics || []);
+          setCompletedDetails(data.completedDetails || {});
+        }
+      } catch (err) {
+        // handle error (optional)
+      }
+      setTimeout(() => setPanesVisible(true), 100);
+    }
+    fetchProgress();
   }, []);
 
+  // Update user progress in backend (MongoDB)
   useEffect(() => {
-    localStorage.setItem("completedSubtopics", JSON.stringify(completedSubtopics));
-  }, [completedSubtopics]);
-
-  useEffect(() => {
-    localStorage.setItem("completedDetails", JSON.stringify(completedDetails));
-  }, [completedDetails]);
+    async function updateProgress() {
+      try {
+        await fetch("/api/lessons/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completedSubtopics, completedDetails }),
+        });
+      } catch (err) {
+        // handle error (optional)
+      }
+    }
+    updateProgress();
+  }, [completedSubtopics, completedDetails]);
 
   const handleSubtopicClick = (subtopic: string) => {
     setFlipState('flipping');
@@ -138,9 +155,12 @@ export default function LessonsPage() {
     }
   };
 
-  const resetProgress = () => {
-    localStorage.removeItem("completedSubtopics");
-    localStorage.removeItem("completedDetails");
+  const resetProgress = async () => {
+    try {
+      await fetch("/api/lessons/progress/reset", { method: "POST" });
+    } catch (err) {
+      // handle error (optional)
+    }
     setCompletedSubtopics([]);
     setCompletedDetails({});
     setShowResetConfirm(false);

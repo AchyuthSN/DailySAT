@@ -3,6 +3,7 @@ import { NavItem } from "@/types/common/navbar";
 export const menuItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Practice", href: "/practice/math" },
+  { label: "Lessons", href:"/lessons" },
   { label: "Study AI", href: "/ai" },
   { label: "Shop", href: "/shop" },
   { label: "Team", href:"/team" },
