@@ -65,10 +65,19 @@ export default function LessonsPage() {
   const currentTopic = currentSubtopicData?.topic;
   const topicSubtopics = allSubtopics.filter((s) => s.topic === currentTopic);
 
-  // Fetch user progress from backend (MongoDB)
+
+  // Fetch user progress from backend (MongoDB) for logged-in user
   useEffect(() => {
     async function fetchProgress() {
       try {
+        // Get user session/email
+        const userRes = await fetch("/api/auth/get-user", { method: "GET" });
+        if (!userRes.ok) throw new Error("Not authenticated");
+        const user = await userRes.json();
+        const email = user?.user?.email;
+        if (!email) throw new Error("No user email");
+
+        // Fetch progress for this user
         const res = await fetch("/api/lessons/progress", { method: "GET" });
         if (res.ok) {
           const data = await res.json();
@@ -83,10 +92,18 @@ export default function LessonsPage() {
     fetchProgress();
   }, []);
 
-  // Update user progress in backend (MongoDB)
+
+  // Update user progress in backend (MongoDB) for logged-in user
   useEffect(() => {
     async function updateProgress() {
       try {
+        // Get user session/email
+        const userRes = await fetch("/api/auth/get-user", { method: "GET" });
+        if (!userRes.ok) return;
+        const user = await userRes.json();
+        const email = user?.user?.email;
+        if (!email) return;
+
         await fetch("/api/lessons/progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
