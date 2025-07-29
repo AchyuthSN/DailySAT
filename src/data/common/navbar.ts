@@ -8,4 +8,5 @@ export const menuItems: NavItem[] = [
   { label: "Shop", href: "/shop" },
   { label: "Team", href:"/team" },
   { label: "Contact", href: "/contact" },
+  { label: "Lessons", href: "/lessons" },
 ];
