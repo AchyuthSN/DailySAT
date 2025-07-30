@@ -9,7 +9,7 @@ const ratelimit = new Ratelimit({
 })
 
 export const handleRatelimitSuccess = async (email: string) => {
-
+    if (process.env.NODE_ENV === "development") return true;
     const { success } = await ratelimit.limit(email as string)
-    return success
+    return success;
 }

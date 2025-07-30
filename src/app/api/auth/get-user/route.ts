@@ -86,17 +86,24 @@ import { handleGetUserCached } from "@/lib/performance/cache";
  */
 
 export const GET = async () => {
+  // Dev bypass for Better Auth
+  if (process.env.NODE_ENV === "development" && process.env.BETTER_AUTH_TOKEN) {
+    return NextResponse.json({
+      user: {
+        name: "Better Dev",
+        email: process.env.BETTER_AUTH_EMAIL || "dev@example.com",
+        image: null,
+      },
+      cached: false,
+    });
+  }
   await client.connect();
   const session = await handleGetSession();
   const email = session?.user?.email;
-  
   const rateLimitSuccess = await handleRatelimitSuccess(email as string)
-  
   try {
-
     const user = await handleGetUser(session); 
     return NextResponse.json({ user, cached: !rateLimitSuccess });
-    
   } catch (error) {
     return Response.json({ error });
   }
